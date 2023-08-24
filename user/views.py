@@ -127,7 +127,7 @@ def change_password(request):
     result = {'result': 0, 'message': '修改成功'}
     return JsonResponse(result)
 
-    def get_userinfo(request):
+def get_userinfo(request):
         if request.method == 'GET':
             username = request.session.get('username')  # 使用 get() 方法避免 KeyError
             if username is None:
