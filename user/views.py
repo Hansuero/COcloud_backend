@@ -1,7 +1,8 @@
 import os
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from COcloud_backend.settings import BASE_DIR
 from user.models import User
@@ -56,5 +57,30 @@ def logout(request):
     request.session.flush()
     result = {'result': 0, 'message': r'注销成功！'}
     return JsonResponse(result)
+
+
+def get_userinfo(request):
+        if request.method == 'GET':
+            username = request.session.get('username')  # 使用 get() 方法避免 KeyError
+            if username is None:
+                result = {'result': -1, 'message': r'未登录！'}
+                return JsonResponse(result)
+
+            user = User.objects.get(username=username)
+            email = user.email
+            photo_url = user.photo_url
+            result = {
+                'result': 0,
+                'message': '返回成功',
+                'username': username,
+                'email': email,
+                'photo_url': photo_url,
+            }
+            return JsonResponse(result)
+
+
+
+
+
 
 # Create your views here.
