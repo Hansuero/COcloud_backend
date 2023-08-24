@@ -7,5 +7,8 @@ urlpatterns = [
     path('register', register),
     path('login', login),
     path('logout', logout),
-
+    path('verify_identity', verify_identity),
+    path('send_code', send_code),
+    path('verify_code', verify_code),
+    path('change_password', change_password),
 ]
