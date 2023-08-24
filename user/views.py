@@ -121,7 +121,7 @@ def get_userinfo(request):
     if request.method == 'GET':
         username = request.session.get('username')  # 使用 get() 方法避免 KeyError
         if username is None:
-            result = {'result': -1, 'message': r'未登录！'}
+            result = {'result': 1, 'message': r'未登录'}
             return JsonResponse(result)
 
         user = User.objects.get(username=username)
