@@ -7,5 +7,12 @@ urlpatterns = [
     path('register', register),
     path('login', login),
     path('logout', logout),
+<<<<<<< HEAD
     path('get_userinfo', get_userinfo),
+=======
+    path('verify_identity', verify_identity),
+    path('send_code', send_code),
+    path('verify_code', verify_code),
+    path('change_password', change_password),
+>>>>>>> 011ce374dcc96df577797eb33abfcc140ad4ecbe
 ]
