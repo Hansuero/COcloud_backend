@@ -50,4 +50,11 @@ def login(request):
     else:
         result = {'result': 1, 'message': r'请求方式错误！'}
         return JsonResponse(result)
+
+
+def logout(request):
+    request.session.flush()
+    result = {'result': 0, 'message': r'注销成功！'}
+    return JsonResponse(result)
+
 # Create your views here.
