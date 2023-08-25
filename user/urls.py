@@ -12,5 +12,7 @@ urlpatterns = [
     path('send_code', send_code),
     path('verify_code', verify_code),
     path('change_password', change_password),
+    path('get_teamlist', get_teamlist),
+    path('create_team', create_team),
 
 ]

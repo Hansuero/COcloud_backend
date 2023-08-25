@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from django.shortcuts import render, get_object_or_404
-
+from team.models import TeamMember, Team
 from COcloud_backend.settings import BASE_DIR
 from user.models import User
 from utils.utils import *
@@ -134,4 +134,56 @@ def get_userinfo(request):
             'email': email,
             'photo_url': photo_url,
         }
+        return JsonResponse(result)
+
+
+def get_teamlist(request):
+    if request.method == 'GET':
+        username = request.session.get('username')
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            result = {'result': 1, 'message': '用户不存在'}
+            return JsonResponse(result)
+
+        team_memberships = TeamMember.objects.filter(member=user)
+
+        team_list = []
+        for membership in team_memberships:
+            team_info = {
+
+                'team_name': membership.team.name,
+                'team_id': membership.team.id,
+                #'role': membership.get_role_display(),
+                # You can include other team information here
+            }
+            team_list.append(team_info)
+
+        result = {
+            'result': 0,
+            'message': '获取参与团队成功',
+            'teamlist': team_list,
+        }
+        return JsonResponse(result)
+
+
+def create_team(request):
+    if request.method == 'POST':
+        team_name = request.POST.get('team_name')
+        username = request.session.get('username')
+        user = User.objects.get(username=username)
+
+        if Team.objects.filter(name=team_name).exists():
+            result = {'result': 1, 'message': '团队名已存在'}
+            return JsonResponse(result)
+
+        team = Team.objects.create(name=team_name, created_by=user)
+
+        TeamMember.objects.create(team=team, member=user, role='creator')
+
+        result = {'result': 0, 'message': '团队创建成功'}
+        return JsonResponse(result)
+    else:
+        result = {'result': 1, 'message': '请求方式错误'}
         return JsonResponse(result)
