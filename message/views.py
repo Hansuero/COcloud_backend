@@ -34,3 +34,34 @@ def delete_allmessage(request):
     Message.objects.filter(user=user, is_read=True).delete()
     result = {'result': 0, 'message': '所有已读消息已被删除'}
     return JsonResponse(result)
+
+
+def read_message(request):
+    read_id = request.POST.get('id')
+    try:
+        message = Message.objects.get(id=read_id)
+        message.is_read = True
+        message.save()
+        result = {'result': 0, 'message': '该消息已为已读状态'}
+        return JsonResponse(result)
+    except Model.DoesNotExist:
+        result = {'result': 1, 'message': '该消息不存在'}
+        return JsonResponse(result)
+
+
+def get_messagelist(request):
+    username = request.session['username']
+    user = User.objects.get(username=username)
+    message_list = []
+    message_filter_list = Message.objects.filter(user=user)
+    if message_filter_list.exists():
+        for message in message_filter_list:
+            message_list += message.to_dic()
+        result = {
+            'result': 0,
+            'message': '获取消息列表成功',
+            'list': message_list
+        }
+        return JsonResponse(result)
+    else:
+        result = {'result': 1, 'message': '消息列表为空'}

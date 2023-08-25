@@ -7,5 +7,6 @@ urlpatterns = [
     path('read_allmessage', read_allmessage),
     path('delete_message', delete_message),
     path('delete_allmessage', delete_allmessage),
-
+    path('read_message', read_message),
+    path('get_messagelist', get_messagelist),
 ]
