@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'COcloud.apps.CocloudConfig',
     'user',
     'team',
+    'message',
+    'chat',
 ]
 
 MIDDLEWARE = [
