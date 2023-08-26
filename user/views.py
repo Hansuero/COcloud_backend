@@ -1,4 +1,6 @@
 import os
+import random
+import string
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -168,17 +170,24 @@ def get_teamlist(request):
         return JsonResponse(result)
 
 
+def generate_invite_code():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+
+
 def create_team(request):
     if request.method == 'POST':
         team_name = request.POST.get('team_name')
         username = request.session.get('username')
         user = User.objects.get(username=username)
+        invite_code = generate_invite_code()
+        while Team.objects.filter(invite_code=invite_code).exists():
+            invite_code = generate_invite_code()
 
         if Team.objects.filter(name=team_name).exists():
             result = {'result': 1, 'message': '团队名已存在'}
             return JsonResponse(result)
 
-        team = Team.objects.create(name=team_name, created_by=user)
+        team = Team.objects.create(name=team_name, created_by=user, invite_code=invite_code)
 
         TeamMember.objects.create(team=team, member=user, role='creator')
 
@@ -186,4 +195,5 @@ def create_team(request):
         return JsonResponse(result)
     else:
         result = {'result': 1, 'message': '请求方式错误'}
+
         return JsonResponse(result)
