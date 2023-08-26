@@ -28,3 +28,4 @@ class Message(models.Model):
             'time': self.created_at,
             'is_read': self.is_read
         }
+        return result
