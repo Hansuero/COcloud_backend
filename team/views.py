@@ -1,3 +1,4 @@
+from django.db.models import Model
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -45,4 +46,53 @@ def get_memberlist(request):
         result = {'result': 1, 'message': '请求方式错误'}
         return JsonResponse(result)
 
-# Create your views here.
+
+def delete_member(request):
+    teammember_id = request.POST.get('teammember_id')
+    team_id = request.POST.get('team_id')
+    try:
+        TeamMember.objects.get(teammember_id=teammember_id, team_id=team_id).delete()
+        result = {'result': 0, 'message': '删除成功'}
+        return JsonResponse(result)
+    except Model.DoesNotExist:
+        result = {'result': 1, 'message': '用户不存在'}
+        return JsonResponse(result)
+
+
+def change_role(request):
+    team_id = request.POST.get('team_id')
+    teammember_id = request.POST.get('teammember_id')
+    new_role_id = request.POST.get('new_role')
+    new_role = ''
+    if new_role_id == 0:
+        new_role = 'creator'
+    elif new_role_id == 1:
+        new_role = 'admin'
+    else:
+        new_role = 'member'
+
+    try:
+        teammember = TeamMember.objects.get(team_id=team_id, teammember_id=teammember_id)
+        teammember.role = new_role
+        teammember.save()
+        result = {'result': 0, 'message': '修改权限成功'}
+        return JsonResponse(result)
+    except Model.DoesNotExist:
+        result = {'result': 1, 'message': '成员不存在'}
+        return JsonResponse(result)
+
+
+def get_role(request):
+    team_id = request.POST.get('team_id')
+    username = request.session['username']
+    teammember_id = User.objects.get(username=username).id
+    role = TeamMember.objects.get(team_id=team_id, teammember_id=teammember_id).role
+    if role == 'creator':
+        result = {'result': 0, 'message': '获取权限成功', 'role': 0}
+        return JsonResponse(result)
+    elif role == 'admin':
+        result = {'result': 0, 'message': '获取权限成功', 'role': 1}
+        return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': '获取权限成功', 'role': 2}
+        return JsonResponse(result)
