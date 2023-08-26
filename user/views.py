@@ -228,7 +228,8 @@ def upload_nikename(request):
     username = request.session['username']
     user = User.objects.get(username=username)
     try:
-        teammember = TeamMember.objects.get(member=user)
+        team = Team.objects.get(id=team_id)
+        teammember = TeamMember.objects.get(member=user, team=team)
         teammember.nikename = nikename
         teammember.save()
         result = {'result': 0, 'message': '修改成功'}

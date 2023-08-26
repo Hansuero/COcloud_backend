@@ -73,7 +73,9 @@ def change_role(request):
         new_role = 'member'
 
     try:
-        teammember = TeamMember.objects.get(team_id=team_id, teammember_id=teammember_id)
+        team = Team.objects.get(id=team_id)
+        teammember = TeamMember.objects.get(id=teammember_id)
+        teammember = TeamMember.objects.get(team=team, teammember=teammember)
         teammember.role = new_role
         teammember.save()
         result = {'result': 0, 'message': '修改权限成功'}
@@ -87,7 +89,9 @@ def get_role(request):
     team_id = request.POST.get('team_id')
     username = request.session['username']
     teammember_id = User.objects.get(username=username).id
-    role = TeamMember.objects.get(team_id=team_id, teammember_id=teammember_id).role
+    team = Team.objects.get(id=team_id)
+    teammember = TeamMember.objects.get(id=teammember_id)
+    role = TeamMember.objects.get(team=team, teammember=teammember).role
     if role == 'creator':
         result = {'result': 0, 'message': '获取权限成功', 'role': 0}
         return JsonResponse(result)
