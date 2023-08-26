@@ -15,5 +15,6 @@ urlpatterns = [
     path('get_teamlist', get_teamlist),
     path('create_team', create_team),
     path('upload_nikename', upload_nikename),
+    path('upload_avatar', upload_avatar),
 
 ]
