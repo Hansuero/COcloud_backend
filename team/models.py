@@ -22,6 +22,7 @@ class TeamMember(models.Model):
 
     team = models.ForeignKey(Team, on_delete=models.CASCADE)  # 团队
     member = models.ForeignKey(User, on_delete=models.CASCADE)  # 团队成员
+    nikename = models.CharField(max_length=16, default=member.username)  # 成员在该团队的昵称
     role = models.CharField(max_length=10, choices=TEAM_ROLES, default='member')    #成员职位
     join_at = models.DateTimeField(auto_now_add=True)   # 加入时间
 
