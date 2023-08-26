@@ -28,7 +28,7 @@ def get_memberlist(request):
 
         for member in members:
             member_info = {
-                'id': member.member.id,
+                'teammember_id': member.member.id,
                 'photo_url': member.member.photo_url_out,
                 'nikename': member.nikename,
                 'email': member.member.email,
@@ -52,10 +52,10 @@ def delete_member(request):
     teammember_id = request.POST.get('teammember_id')
     team_id = request.POST.get('team_id')
     try:
-        TeamMember.objects.get(teammember_id=teammember_id, team_id=team_id).delete()
+        TeamMember.objects.get(member_id=teammember_id, team_id=team_id).delete()
         result = {'result': 0, 'message': '删除成功'}
         return JsonResponse(result)
-    except Model.DoesNotExist:
+    except TeamMember.DoesNotExist:
         result = {'result': 1, 'message': '用户不存在'}
         return JsonResponse(result)
 
@@ -65,22 +65,23 @@ def change_role(request):
     teammember_id = request.POST.get('teammember_id')
     new_role_id = request.POST.get('new_role')
     new_role = ''
-    if new_role_id == 0:
+    if new_role_id == '0':
         new_role = 'creator'
-    elif new_role_id == 1:
+    elif new_role_id == '1':
         new_role = 'admin'
     else:
         new_role = 'member'
 
     try:
         team = Team.objects.get(id=team_id)
-        teammember = TeamMember.objects.get(id=teammember_id)
-        teammember = TeamMember.objects.get(team=team, teammember=teammember)
+        user = User.objects.get(id=teammember_id)
+        teammember = TeamMember.objects.get(team=team, member=user)
         teammember.role = new_role
+        print(new_role)
         teammember.save()
         result = {'result': 0, 'message': '修改权限成功'}
         return JsonResponse(result)
-    except Model.DoesNotExist:
+    except TeamMember.DoesNotExist:
         result = {'result': 1, 'message': '成员不存在'}
         return JsonResponse(result)
 
@@ -90,8 +91,8 @@ def get_role(request):
     username = request.session['username']
     teammember_id = User.objects.get(username=username).id
     team = Team.objects.get(id=team_id)
-    teammember = TeamMember.objects.get(id=teammember_id)
-    role = TeamMember.objects.get(team=team, teammember=teammember).role
+    user = User.objects.get(id=teammember_id)
+    role = TeamMember.objects.get(team=team, member=user).role
     if role == 'creator':
         result = {'result': 0, 'message': '获取权限成功', 'role': 0}
         return JsonResponse(result)
@@ -108,7 +109,7 @@ def get_invite_link(request):
     try:
         team = Team.objects.get(id=team_id)
         invite_code = team.invite_code
-        full_invite_code = f"http://82.157.165.72:8000/invite?sign={invite_code}"
+        full_invite_code = f"http://82.157.165.72:8000/invite/{invite_code}"
         result = {'result': 0, 'message': '成功获得邀请链接', 'invite_link': full_invite_code}
         return JsonResponse(result)
     except Team.DoesNotExist:
