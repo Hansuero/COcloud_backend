@@ -1,4 +1,6 @@
 from django.urls import path
+
+from team import views
 from team.views import *
 
 urlpatterns = [
@@ -8,4 +10,6 @@ urlpatterns = [
     path('delete_member', delete_member),
     path('change_role', change_role),
     path('get_role', get_role),
+    path('get_invite_link', get_invite_link),
+    path('invite', views.invite, name='invite'),
 ]

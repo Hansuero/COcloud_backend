@@ -101,3 +101,40 @@ def get_role(request):
     else:
         result = {'result': 0, 'message': '获取权限成功', 'role': 2}
         return JsonResponse(result)
+
+
+def get_invite_link(request):
+    team_id = request.POST.get('team_id')
+    try:
+        team = Team.objects.get(id=team_id)
+        invite_code = team.invite_code
+        full_invite_code = f"http://82.157.165.72:8000/invite?sign={invite_code}"
+        result = {'result': 0, 'message': '成功获得邀请链接', 'invite_link': full_invite_code}
+        return JsonResponse(result)
+    except Team.DoesNotExist:
+        result = {'result': 1, 'message': '团队不存在'}
+        return JsonResponse(result)
+
+
+def invite(request):
+    invite_code = request.GET.get('sign')
+    try:
+        team = Team.objects.get(invite_code=invite_code)
+    except Team.DoesNotExist:
+        result = {'result': 1, 'message': '无效的邀请链接'}
+        return JsonResponse(result)
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+
+    user = User.objects.get(username=username, password=password)
+    if user is None:
+        result = {'result': 1, 'message': '用户名或密码错误'}
+        return JsonResponse(result)
+    if TeamMember.objects.filter(team=team, member=user).exists():
+        result = {'result': 1, 'message': '用户已是团队成员'}
+        return JsonResponse(result)
+    else:
+
+        TeamMember.objects.create(team=team, member=user, role='member', nikename=user.username)
+        result = {'result': 0, 'message': '成功加入团队'}
+        return JsonResponse(result)
