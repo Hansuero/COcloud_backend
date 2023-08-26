@@ -117,7 +117,7 @@ def get_invite_link(request):
 
 
 def invite(request):
-    invite_code = request.GET.get('sign')
+    invite_code = request.POST.get('sign')
     try:
         team = Team.objects.get(invite_code=invite_code)
     except Team.DoesNotExist:
