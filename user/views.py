@@ -1,6 +1,7 @@
 import os
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Model
 from django.http import JsonResponse
 
 from django.shortcuts import render, get_object_or_404
@@ -209,4 +210,20 @@ def create_team(request):
         return JsonResponse(result)
     else:
         result = {'result': 1, 'message': '请求方式错误'}
+        return JsonResponse(result)
+
+
+def upload_nikename(request):
+    team_id = request.POST.get('team_id')
+    nikename = request.POST.get('nikename')
+    username = request.session['username']
+    user = User.objects.get(username=username)
+    try:
+        teammember = TeamMember.objects.get(member=user)
+        teammember.nikename = nikename
+        teammember.save()
+        result = {'result': 0, 'message': '修改成功'}
+        return JsonResponse(result)
+    except Model.DoesNotExist:
+        result = {'result': 1, 'message': '用户不存在'}
         return JsonResponse(result)
