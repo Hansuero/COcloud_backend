@@ -227,7 +227,7 @@ def create_team(request):
 
 
 def upload_nikename(request):
-    team_id = request.POST.get('team_id')
+    team_id = request.POST.get('teamid')
     nikename = request.POST.get('nikename')
     username = request.session['username']
     user = User.objects.get(username=username)
@@ -238,6 +238,6 @@ def upload_nikename(request):
         teammember.save()
         result = {'result': 0, 'message': '修改成功'}
         return JsonResponse(result)
-    except Model.DoesNotExist:
+    except TeamMember.DoesNotExist:
         result = {'result': 1, 'message': '用户不存在'}
         return JsonResponse(result)
