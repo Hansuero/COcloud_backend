@@ -13,18 +13,18 @@ class Team(models.Model):
 
 
 class TeamMember(models.Model):
-
     TEAM_ROLES = (
         ('admin', '团队管理员'),
         ('member', '普通成员'),
         ('creator', '团队创建者'),
     )
 
+
     team = models.ForeignKey(Team, on_delete=models.CASCADE)  # 团队
     member = models.ForeignKey(User, on_delete=models.CASCADE)  # 团队成员
-    nikename = models.CharField(max_length=16, default=member.username)  # 成员在该团队的昵称
-    role = models.CharField(max_length=10, choices=TEAM_ROLES, default='member')    #成员职位
-    join_at = models.DateTimeField(auto_now_add=True)   # 加入时间
+    nikename = models.CharField(max_length=16)  # 成员在该团队的昵称
+    role = models.CharField(max_length=10, choices=TEAM_ROLES, default='member')  # 成员职位
+    join_at = models.DateTimeField(auto_now_add=True)  # 加入时间
 
     def __str__(self):
         return f"{self.member.username} - {self.team.name}"
