@@ -7,6 +7,7 @@ class Team(models.Model):
     name = models.CharField('团队名', max_length=20)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)  # 创建者
     created_at = models.DateTimeField(auto_now_add=True)  # 创建时间
+    invite_code = models.CharField('邀请码', max_length=16)
 
     def __str__(self):
         return self.name
