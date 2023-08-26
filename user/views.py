@@ -121,26 +121,30 @@ def change_password(request):
 
 
 def get_userinfo(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         username = request.session.get('username')  # 使用 get() 方法避免 KeyError
         if username is None:
             result = {'result': 1, 'message': r'未登录'}
             return JsonResponse(result)
 
         user = User.objects.get(username=username)
+        team_id = request.POST.get('teamid')
+        team = Team.objects.get(id=team_id)
+        nikename = TeamMember.objects.get(team=team, member=user).nikename
         email = user.email
-        photo_url = user.photo_url
+        photo_url_out = user.photo_url_out
         result = {
             'result': 0,
             'message': '返回成功',
             'username': username,
             'email': email,
-            'photo_url': photo_url,
+            'photo_url': photo_url_out,
+            'nikename': nikename
         }
         return JsonResponse(result)
 
 
-def upload_photo(request):
+def upload_avatar(request):
     username = request.session['username']
     user = User.objects.get(username=username)
     avatar = request.FILES.get('avatar')  # 获取上传的头像文件
