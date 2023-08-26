@@ -65,3 +65,4 @@ def get_messagelist(request):
         return JsonResponse(result)
     else:
         result = {'result': 1, 'message': '消息列表为空'}
+        return JsonResponse(result)
