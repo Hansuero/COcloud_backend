@@ -1,7 +1,7 @@
 from django.db.models import Model
 from django.shortcuts import render
 from django.http import JsonResponse
-from message.models import Message
+from message.models import Report
 from user.models import User
 
 
@@ -9,7 +9,7 @@ from user.models import User
 def read_allmessage(request):
     username = request.session['username']
     user = User.objects.get(username=username)
-    for message in Message.objects.filter(user=user):
+    for message in Report.objects.filter(user=user):
         message.is_read = True
         message.save()
     result = {'result': 0, 'message': '所有消息都为已读'}
@@ -19,11 +19,11 @@ def read_allmessage(request):
 def delete_message(request):
     delete_id = request.POST.get('id')
     try:
-        message = Message.objects.get(id=delete_id)
+        message = Report.objects.get(id=delete_id)
         message.delete()
         result = {'result': 0, 'message': '删除消息成功'}
         return JsonResponse(result)
-    except Model.DoesNotExist:
+    except Report.DoesNotExist:
         result = {'result': 1, 'message': '消息不存在'}
         return JsonResponse(result)
 
@@ -31,7 +31,7 @@ def delete_message(request):
 def delete_allmessage(request):
     username = request.session['username']
     user = User.objects.get(username=username)
-    Message.objects.filter(user=user, is_read=True).delete()
+    Report.objects.filter(user=user, is_read=True).delete()
     result = {'result': 0, 'message': '所有已读消息已被删除'}
     return JsonResponse(result)
 
@@ -39,12 +39,12 @@ def delete_allmessage(request):
 def read_message(request):
     read_id = request.POST.get('id')
     try:
-        message = Message.objects.get(id=read_id)
+        message = Report.objects.get(id=read_id)
         message.is_read = True
         message.save()
         result = {'result': 0, 'message': '该消息已为已读状态'}
         return JsonResponse(result)
-    except Model.DoesNotExist:
+    except Report.DoesNotExist:
         result = {'result': 1, 'message': '该消息不存在'}
         return JsonResponse(result)
 
@@ -53,7 +53,7 @@ def get_messagelist(request):
     username = request.session['username']
     user = User.objects.get(username=username)
     message_list = []
-    message_filter_list = Message.objects.filter(user=user)
+    message_filter_list = Report.objects.filter(user=user)
     if message_filter_list.exists():
         for message in message_filter_list:
             message_list += message.to_dic()

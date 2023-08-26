@@ -30,10 +30,9 @@ def get_memberlist(request):
             member_info = {
                 'teammember_id': member.member.id,
                 'photo_url': member.member.photo_url_out,
-                'nikename': member.nikename,
+                'nickname': member.nickname,
                 'email': member.member.email,
-                'role': '0' if member.role == 'creator' else '2' if member.role == 'member' else '1',
-                'rolename': '团队创建者' if member.role == 'creator' else '普通成员' if member.role == 'member' else '团队管理员',
+                'role': '0' if member.role == 'creator' else '2' if member.role == 'member' else '1'
             }
             member_list.append(member_info)
 
@@ -110,7 +109,7 @@ def get_invite_link(request):
     try:
         team = Team.objects.get(id=team_id)
         invite_code = team.invite_code
-        full_invite_code = f"http://82.157.165.72:8000/invite/{invite_code}"
+        full_invite_code = f"http://82.157.165.72/invite/{invite_code}"
         result = {'result': 0, 'message': '成功获得邀请链接', 'invite_link': full_invite_code}
         return JsonResponse(result)
     except Team.DoesNotExist:
@@ -137,6 +136,6 @@ def invite(request):
         return JsonResponse(result)
     else:
 
-        TeamMember.objects.create(team=team, member=user, role='member', nikename=user.username)
+        TeamMember.objects.create(team=team, member=user, role='member', nickname=user.username)
         result = {'result': 0, 'message': '成功加入团队'}
         return JsonResponse(result)

@@ -18,7 +18,7 @@ def register(request):
     password = request.POST.get('password', '')
 
     if User.objects.filter(username=username).exists():
-        result = {'result': 1, 'message': r'用户名已存在'}
+        result = {'result': 1, 'report': r'用户名已存在'}
         return JsonResponse(result)
 
     email = request.POST.get('email', '')
@@ -28,7 +28,7 @@ def register(request):
     user.save()
     # request.session['username'] = username
     # request.session.set_expiry(3600)
-    result = {'result': 0, 'message': r'注册成功'}
+    result = {'result': 0, 'report': r'注册成功'}
     return JsonResponse(result)
 
 
@@ -36,7 +36,7 @@ def login(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
     if not User.objects.filter(username=username):
-        result = {'result': 1, 'message': r'用户名或密码错误'}
+        result = {'result': 1, 'report': r'用户名或密码错误'}
         return JsonResponse(result)
     user = User.objects.get(username=username)
     if user.password == password:
@@ -44,10 +44,10 @@ def login(request):
         user = User.objects.get(username=username)
         user.is_login = True
         user.save()
-        result = {'result': 0, 'message': r'登录成功'}
+        result = {'result': 0, 'report': r'登录成功'}
         return JsonResponse(result)
     else:
-        result = {'result': 1, 'message': r'用户名或密码错误'}
+        result = {'result': 1, 'report': r'用户名或密码错误'}
         return JsonResponse(result)
 
 
@@ -57,7 +57,7 @@ def logout(request):
     user.is_login = False
     user.save()
     request.session.flush()
-    result = {'result': 0, 'message': r'注销成功'}
+    result = {'result': 0, 'report': r'注销成功'}
     return JsonResponse(result)
 
 
@@ -70,14 +70,14 @@ def verify_identity(request):
     username = request.POST.get('username')
     email = request.POST.get('email')
     if User.objects.filter(username=username, email=email).exists():
-        result = {'result': 0, 'message': r'确认成功'}
+        result = {'result': 0, 'report': r'确认成功'}
         global username_verify
         username_verify = username
         global email_verify
         email_verify = email
         return JsonResponse(result)
     else:
-        result = {'result': 1, 'message': r'用户名或邮箱错误'}
+        result = {'result': 1, 'report': r'用户名或邮箱错误'}
         username_verify = ''
         email_verify = ''
         return JsonResponse(result)
@@ -87,11 +87,11 @@ def send_code(request):
     try:
         global code
         code = send_email(email_verify)
-        result = {'result': 0, 'message': r'发送成功'}
+        result = {'result': 0, 'report': r'发送成功'}
         return JsonResponse(result)
     except:
         code = 0
-        result = {'result': 1, 'message': r'发送失败'}
+        result = {'result': 1, 'report': r'发送失败'}
         return JsonResponse(result)
 
 
@@ -100,11 +100,11 @@ def verify_code(request):
     code_to_verify = request.POST.get('code')
     if code == code_to_verify:
         code = 0
-        result = {'result': 0, 'message': '验证码正确'}
+        result = {'result': 0, 'report': '验证码正确'}
         return JsonResponse(result)
     else:
         code = 0
-        result = {'result': 1, 'message': '验证码错误'}
+        result = {'result': 1, 'report': '验证码错误'}
         return JsonResponse(result)
 
 
@@ -116,7 +116,7 @@ def change_password(request):
     user.save()
     username_verify = ''
     email_verify = ''
-    result = {'result': 0, 'message': '修改成功'}
+    result = {'result': 0, 'report': '修改成功'}
     return JsonResponse(result)
 
 
@@ -124,22 +124,22 @@ def get_userinfo(request):
     if request.method == 'POST':
         username = request.session.get('username')  # 使用 get() 方法避免 KeyError
         if username is None:
-            result = {'result': 1, 'message': r'未登录'}
+            result = {'result': 1, 'report': r'未登录'}
             return JsonResponse(result)
 
         user = User.objects.get(username=username)
         team_id = request.POST.get('teamid')
         team = Team.objects.get(id=team_id)
-        nikename = TeamMember.objects.get(team=team, member=user).nikename
+        nickname = TeamMember.objects.get(team=team, member=user).nickname
         email = user.email
         photo_url_out = user.photo_url_out
         result = {
             'result': 0,
-            'message': '返回成功',
+            'report': '返回成功',
             'username': username,
             'email': email,
             'photo_url': photo_url_out,
-            'nikename': nikename
+            'nickname': nickname
         }
         return JsonResponse(result)
 
@@ -163,7 +163,7 @@ def upload_avatar(request):
         user.photo_url = avatar_path
         user.photo_url_out = 'http://82.157.165.72:8888/avatar/' + f'{user.id}_avatar{ext}'
         user.save()
-        result = {'result': 0, 'message': r'上传成功'}
+        result = {'result': 0, 'report': r'上传成功'}
         return JsonResponse(result)
 
 
@@ -174,7 +174,7 @@ def get_teamlist(request):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            result = {'result': 1, 'message': '用户不存在'}
+            result = {'result': 1, 'report': '用户不存在'}
             return JsonResponse(result)
 
         team_memberships = TeamMember.objects.filter(member=user)
@@ -192,7 +192,7 @@ def get_teamlist(request):
 
         result = {
             'result': 0,
-            'message': '获取参与团队成功',
+            'report': '获取参与团队成功',
             'teamlist': team_list,
         }
         return JsonResponse(result)
@@ -212,32 +212,32 @@ def create_team(request):
             invite_code = generate_invite_code()
 
         if Team.objects.filter(name=team_name).exists():
-            result = {'result': 1, 'message': '团队名已存在'}
+            result = {'result': 1, 'report': '团队名已存在'}
             return JsonResponse(result)
 
         team = Team.objects.create(name=team_name, created_by=user, invite_code=invite_code)
 
-        TeamMember.objects.create(team=team, member=user, role='creator')
+        TeamMember.objects.create(team=team, member=user, role='creator', nickname=user.username)
 
-        result = {'result': 0, 'message': '团队创建成功'}
+        result = {'result': 0, 'report': '团队创建成功'}
         return JsonResponse(result)
     else:
-        result = {'result': 1, 'message': '请求方式错误'}
+        result = {'result': 1, 'report': '请求方式错误'}
         return JsonResponse(result)
 
 
-def upload_nikename(request):
+def upload_nickname(request):
     team_id = request.POST.get('teamid')
-    nikename = request.POST.get('nikename')
+    nickname = request.POST.get('nickname')
     username = request.session['username']
     user = User.objects.get(username=username)
     try:
         team = Team.objects.get(id=team_id)
-        teammember = TeamMember.objects.get(member=user, team=team, nikename=user.username)
-        teammember.nikename = nikename
+        teammember = TeamMember.objects.get(member=user, team=team, nickname=user.username)
+        teammember.nickname = nickname
         teammember.save()
-        result = {'result': 0, 'message': '修改成功'}
+        result = {'result': 0, 'report': '修改成功'}
         return JsonResponse(result)
     except TeamMember.DoesNotExist:
-        result = {'result': 1, 'message': '用户不存在'}
+        result = {'result': 1, 'report': '用户不存在'}
         return JsonResponse(result)

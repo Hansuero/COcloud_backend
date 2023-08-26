@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-yb-8v53uclb@9b)(+x$$x3!my-_-+a%w!t2z*$x=o7_a@0wb!-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['82.157.165.72']
 
 
 # Application definition
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'team',
     'message',
     'chat',
-    'project',
+    'project'
 ]
 
 MIDDLEWARE = [
@@ -82,7 +82,7 @@ WSGI_APPLICATION = "COcloud_backend.wsgi.application"
 
 # MySQL数据库配置
 mysql_ENGINE = 'django.db.backends.mysql'
-mysql_NAME = 'cocloud_backend'
+mysql_NAME = 'cocloud'
 mysql_USER = 'comusic'
 mysql_PASSWORD = '2121Jizu'
 mysql_HOST = '82.157.165.72'

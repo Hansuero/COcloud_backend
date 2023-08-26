@@ -5,7 +5,7 @@ from user.models import User
 
 
 # Create your models here.
-class Message(models.Model):
+class Report(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     chat_message = models.ForeignKey(GroupChatMessage, blank=True, null=True, on_delete=models.CASCADE)
     # text_message = models.ForeignKey(, blank=True, null=True)
