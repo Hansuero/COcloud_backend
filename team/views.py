@@ -29,7 +29,8 @@ def get_memberlist(request):
         for member in members:
             member_info = {
                 'id': member.member.id,
-                'username': member.member.username,
+                'photo_url': member.member.photo_url_out,
+                'nikename': member.nikename,
                 'email': member.member.email,
                 'role': '0' if member.role == 'creator' else '2' if member.role == 'member' else '1'
             }
