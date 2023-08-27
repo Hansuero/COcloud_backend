@@ -10,7 +10,7 @@ CONN_LIST = [[] for i in range(100)]
 
 
 class ChatConsumer(WebsocketConsumer):
-    def websocket_connect(self, message):
+    def websocket_connect(self, message):  # message {'type': 'websocket.receive', 'text': {'username': '你爹', 'msg': i}}
         print("开始链接...")
         # 有客户端来向后端发送websocket连接的请求时，自动触发。
         # 服务端允许和客户端创建连接（握手）。
@@ -28,10 +28,6 @@ class ChatConsumer(WebsocketConsumer):
 
     def websocket_receive(self, message):
         text = eval((message['text']))
-
-        print('---------DEBUG-----------')
-        print(text)
-        print(text['username'])
 
         # 浏览器基于websocket向后端发送数据，自动触发接收消息。
         username = text['username']
