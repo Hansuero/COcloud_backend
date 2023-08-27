@@ -3,6 +3,8 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+
+from message.models import Report
 from .models import Team, TeamMember
 from user.models import User
 
@@ -140,3 +142,43 @@ def invite(request):
         TeamMember.objects.create(team=team, member=user, role='member', nickname=user.username)
         result = {'result': 0, 'message': '成功加入团队'}
         return JsonResponse(result)
+
+
+def chat_at(request):
+    receiver_name = request.POST.get('username')
+    sender_name = request.session['username']
+    team_id = request.POST.get('team_id')
+    receiver = User.objects.get(username=receiver_name)
+    sender = User.objects.get(username=sender_name)
+    message = Report.objects.create(sender=sender, receiver=receiver, chat_id=team_id)
+    message.save()
+    result = {'result': 0, 'message': '@成功'}
+    return JsonResponse(result)
+
+
+def get_namelist(request):
+    team_id = request.POST.get('team_id')
+    username = request.session.get('username')
+    user = User.objects.get(username=username)
+
+    try:
+        team = Team.objects.get(id=team_id)
+    except Team.DoesNotExist:
+        result = {'result': 1, 'message': '团队不存在'}
+        return JsonResponse(result)
+
+    if not TeamMember.objects.filter(team=team, member=user).exists():
+        result = {'result': 2, 'message': '你不是该团队成员'}
+        return JsonResponse(result)
+
+    members = TeamMember.objects.filter(team=team)
+    namelist = []
+
+    for member in members:
+        namelist.append(member.member.username)
+    result = {
+        'result': 0,
+        'message': '获取成员用户名列表成功',
+        'namelist': namelist
+    }
+    return JsonResponse(result)

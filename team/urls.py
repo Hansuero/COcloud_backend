@@ -12,4 +12,6 @@ urlpatterns = [
     path('get_role', get_role),
     path('get_invite_link', get_invite_link),
     path('invite', views.invite, name='invite'),
+    path('chat_at', chat_at),
+    path('get_namelist', get_namelist),
 ]
