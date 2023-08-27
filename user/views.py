@@ -161,7 +161,7 @@ def upload_avatar(request):
 
         # 更新用户的头像路径
         user.photo_url = avatar_path
-        user.photo_url_out = 'http://82.157.165.72:8888/avatar/' + f'{user.id}_avatar{ext}'
+        user.photo_url_out = 'http://82.157.165.72:8888/avatar/' + f'{user.username}_avatar{ext}'
         user.save()
         result = {'result': 0, 'report': r'上传成功'}
         return JsonResponse(result)

@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -25,12 +24,14 @@ SECRET_KEY = "django-insecure-yb-8v53uclb@9b)(+x$$x3!my-_-+a%w!t2z*$x=o7_a@0wb!-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['82.157.165.72']
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
 INSTALLED_APPS = [
+    #'daphne',
+    'channels',
+    'chat',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,8 +42,9 @@ INSTALLED_APPS = [
     'user',
     'team',
     'message',
-    'chat',
-    'project'
+
+    'project',
+
 ]
 
 MIDDLEWARE = [
@@ -73,8 +75,19 @@ TEMPLATES = [
         },
     },
 ]
-
+ASGI_APPLICATION = 'COcloud_backend.asgi.application'
 WSGI_APPLICATION = "COcloud_backend.wsgi.application"
+
+CHANNEL_LAYERS = {
+'default': {
+		'BACKEND': 'channels_redis.core.RedisChannelLayer',
+		'CONFIG': {
+			# 连接自己的redis
+			"hosts": [('82.157.165.72', 6379)],
+		},
+	}
+}
+
 
 
 # Database
@@ -88,7 +101,6 @@ mysql_PASSWORD = '2121Jizu'
 mysql_HOST = '82.157.165.72'
 mysql_PORT = '3306'
 
-
 DATABASES = {
     'default': {
         'ENGINE': mysql_ENGINE,
@@ -100,16 +112,16 @@ DATABASES = {
     }
 }
 
-#邮件相关配置
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'# 发送邮件配置
-EMAIL_HOST = 'smtp.163.com'# 服务器名称
-EMAIL_PORT = 25# 服务端口
-EMAIL_HOST_USER = 'judgement9259@163.com' # 填写自己邮箱
-EMAIL_HOST_PASSWORD = 'NNCABGNHANCKJOCK'# 在邮箱中设置的客户端授权密码
-EMAIL_FROM = 'COcloud'# 收件人看到的发件人
+# 邮件相关配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # 发送邮件配置
+EMAIL_HOST = 'smtp.163.com'  # 服务器名称
+EMAIL_PORT = 25  # 服务端口
+EMAIL_HOST_USER = 'judgement9259@163.com'  # 填写自己邮箱
+EMAIL_HOST_PASSWORD = 'NNCABGNHANCKJOCK'  # 在邮箱中设置的客户端授权密码
+EMAIL_FROM = 'COcloud'  # 收件人看到的发件人
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-EMAIL_USE_TLS = True   #是否使用TLS安全传输协议
-#EMAIL_USE_SSL = True    #是否使用SSL加密，qq企业邮箱要求使用
+EMAIL_USE_TLS = True  # 是否使用TLS安全传输协议
+# EMAIL_USE_SSL = True    #是否使用SSL加密，qq企业邮箱要求使用
 
 
 # Password validation
@@ -130,7 +142,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -141,7 +152,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

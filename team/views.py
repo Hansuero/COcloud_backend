@@ -32,7 +32,8 @@ def get_memberlist(request):
                 'photo_url': member.member.photo_url_out,
                 'nickname': member.nickname,
                 'email': member.member.email,
-                'role': '0' if member.role == 'creator' else '2' if member.role == 'member' else '1'
+                'role': '0' if member.role == 'creator' else '2' if member.role == 'member' else '1',
+                'rolename': '团队创建者' if member.role == 'creator' else '团队管理员' if member.role == 'member' else '普通成员'
             }
             member_list.append(member_info)
 

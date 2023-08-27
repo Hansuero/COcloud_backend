@@ -1,52 +1,30 @@
 import json
-from asgiref.sync import async_to_sync
+
 from channels.generic.websocket import WebsocketConsumer
-import datetime
+from channels.exceptions import StopConsumer
+
+CONN_LIST = []
 
 
 class ChatConsumer(WebsocketConsumer):
-    # websocket建立连接时执行方法
-    def connect(self):
-        # 从url里获取聊天室名字，为每个房间建立一个频道组
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = 'chat_%s' % self.room_name
-
-        # 将当前频道加入频道组
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        # 接受所有websocket请求
+    def websocket_connect(self, message):
+        print("开始链接...")
+        # 有客户端来向后端发送websocket连接的请求时，自动触发。
+        # 服务端允许和客户端创建连接（握手）。
         self.accept()
 
-    # websocket断开时执行方法
-    def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name,
-            self.channel_name
-        )
+        CONN_LIST.append(self)
 
-    # 从websocket接收到消息时执行函数
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['report']
+    def websocket_receive(self, message):
+        # 浏览器基于websocket向后端发送数据，自动触发接收消息。
+        print('接受的消息', message)
+        text = message  # {'type': 'websocket.receive', 'text': '阿斯蒂芬'}
+        print("接收到消息-->", text)
+        print(('msg' in text['text']))
+        res = message
+        for conn in CONN_LIST:
+            conn.send(json.dumps(res))
 
-        # 发送消息到频道组，频道组调用chat_message方法
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'report': message
-            }
-        )
-
-    # 从频道组接收到消息后执行方法
-    def chat_message(self, event):
-        message = event['report']
-        datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        # 通过websocket发送消息到客户端
-        self.send(text_data=json.dumps({
-            'report': f'{datetime_str}:{message}'
-        }))
+    def websocket_disconnect(self, message):
+        CONN_LIST.remove(self)
+        raise StopConsumer()
