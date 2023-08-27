@@ -31,7 +31,7 @@ def delete_message(request):
 def delete_allmessage(request):
     username = request.session['username']
     user = User.objects.get(username=username)
-    Report.objects.filter(user=user, is_read=True).delete()
+    Report.objects.filter(receiver=user, is_read=True).delete()
     result = {'result': 0, 'message': '所有已读消息已被删除'}
     return JsonResponse(result)
 
@@ -53,7 +53,7 @@ def get_messagelist(request):
     username = request.session['username']
     user = User.objects.get(username=username)
     message_list = []
-    message_filter_list = Report.objects.filter(user=user).order_by('-created_at')
+    message_filter_list = Report.objects.filter(receiver=user).order_by('-created_at')
     if message_filter_list.exists():
         for message in message_filter_list:
             message_list.append(message.to_dic())
