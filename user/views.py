@@ -152,7 +152,7 @@ def upload_avatar(request):
     if avatar:  # 如果上传了头像文件
         # 生成头像文件的保存路径
         _, ext = os.path.splitext(avatar.name)
-        avatar_path = os.path.join(BASE_DIR, 'avatar', f'{user.id}_avatar{ext}')
+        avatar_path = os.path.join(BASE_DIR, 'avatar', f'{user.username}_avatar.png')
 
         # 保存头像文件到指定路径
         with open(avatar_path, 'wb') as file:
@@ -161,7 +161,7 @@ def upload_avatar(request):
 
         # 更新用户的头像路径
         user.photo_url = avatar_path
-        user.photo_url_out = 'http://82.157.165.72:8888/avatar/' + f'{user.username}_avatar{ext}'
+        user.photo_url_out = 'http://82.157.165.72:8888/avatar/' + f'{user.username}_avatar.png'
         user.save()
         result = {'result': 0, 'report': r'上传成功'}
         return JsonResponse(result)
