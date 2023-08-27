@@ -148,12 +148,22 @@ def chat_at(request):
     receiver_name = request.POST.get('username')
     sender_name = request.session['username']
     team_id = request.POST.get('team_id')
-    receiver = User.objects.get(username=receiver_name)
-    sender = User.objects.get(username=sender_name)
-    message = Report.objects.create(sender=sender, receiver=receiver, chat_id=team_id)
-    message.save()
-    result = {'result': 0, 'message': '@成功'}
-    return JsonResponse(result)
+    if receiver_name == '所有人':
+        team_member_list = TeamMember.objects.filter(id=team_id)
+        for team_member in team_member_list:
+            receiver = User.objects.get(id=team_member.member.id)
+            sender = User.objects.get(username=sender_name)
+            message = Report.objects.create(user=sender, receiver=receiver, chat_id=team_id)
+            message.save()
+        result = {'result': 0, 'message': '@成功'}
+        return JsonResponse(result)
+    else:
+        receiver = User.objects.get(username=receiver_name)
+        sender = User.objects.get(username=sender_name)
+        message = Report.objects.create(user=sender, receiver=receiver, chat_id=team_id)
+        message.save()
+        result = {'result': 0, 'message': '@成功'}
+        return JsonResponse(result)
 
 
 def get_namelist(request):
