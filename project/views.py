@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Project,DeletedProject , Team, User
+from django.utils import timezone
+
+from .models import Project, DeletedProject, Team, User, Document
 
 
 def create_project(request):
@@ -54,5 +56,30 @@ def get_project(request):
         project_list.append(project_info)
 
     result = {'result': 0, 'message': '获取项目列表成功', 'project_list': project_list}
+    return JsonResponse(result)
+
+
+def create_file(request):
+    file_name = request.POST.get('file_name')
+    project_id = request.POST.get('project_id')
+    team_id = request.POST.get('team_id')
+    username = request.session.get('username')
+
+    # 获取当前登录用户和团队
+    user = User.objects.get(username=username)
+    team = get_object_or_404(Team, id=team_id)
+    project = get_object_or_404(Project, id=project_id)
+
+    # 创建新文档
+    document = Document.objects.create(
+        team=team,
+        project=project,
+        title=file_name,
+        content='',
+        edited_by=user,
+        edited_at=timezone.now()
+    )
+
+    result = {'result': 0, 'message': '文档创建成功'}
     return JsonResponse(result)
 # Create your views here.
