@@ -21,4 +21,14 @@ class DeletedProject(models.Model):
 
     def __str__(self):
         return f"Deleted:{self.project.name}"
+
+
+class Document(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    edited_by = models.ForeignKey(User, on_delete=models.CASCADE)  # 最后修改者
+    edited_at = models.DateTimeField(auto_now=True)  # 最后修改时间
+
 # Create your models here.
