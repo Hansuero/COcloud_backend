@@ -52,7 +52,7 @@ def get_project(request):
             'project_id': project.id,
             'project_name': project.name,
             'project_creator': project.created_by.username,
-            'project_create_time': project.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'project_create_time': project.created_at.strftime('%Y-%m-%d'),
             'project_member': project.team.teammember_set.count()
         }
         project_list.append(project_info)
