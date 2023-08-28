@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -149,4 +151,23 @@ def chat_at(request):
     result = {'result': 0, 'message': '@ 成功'}
     return JsonResponse(result)
 
+
+def cur_edit(request):
+    file_id = request.POST.get('file_id')
+    user_name = request.POST.get('user_name')
+    content = request.POST.get('content')
+    project_id = request.POST.get('project_id')
+    team_id = request.POST.get('team_id')
+
+    # 根据提供的信息找到对应的文档
+    document = get_object_or_404(Document, id=file_id, project__id=project_id, project__team__id=team_id)
+
+    # 更新文档内容和编辑信息
+    document.content = content
+    document.edited_by = User.objects.get(username=user_name)
+    document.edited_at = datetime.now()
+    document.save()
+
+    result = {'result': 0, 'message': '文档内容更新成功'}
+    return JsonResponse(result)
 # Create your views here.
