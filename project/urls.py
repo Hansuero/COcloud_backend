@@ -13,4 +13,6 @@ urlpatterns = [
     path('get_file', get_file),
     path('chat_at', chat_at),
     path('cur_edit', cur_edit),
+    path('get_single_project', get_single_project),
+
 ]

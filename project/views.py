@@ -170,4 +170,25 @@ def cur_edit(request):
 
     result = {'result': 0, 'message': '文档内容更新成功'}
     return JsonResponse(result)
+
+
+def get_single_project(request):
+    team_id = request.GET.get('team_id')
+    project_id = request.GET.get('project_id')
+
+    try:
+        project = Project.objects.get(id=project_id, team__id=team_id)
+    except Project.DoesNotExist:
+        result = {'result': 1, 'message': '项目不存在'}
+        return JsonResponse(result)
+
+    project_info = {
+        'project_name': project.name,
+        'project_team': project.team.name,
+        'project_creator': project.created_by.username,
+        'project_create_time': project.created_at.strftime('%Y-%m-%d')
+    }
+
+    result = {'result': 0, 'message': '获取项目信息成功', 'project': project_info}
+    return JsonResponse(result)
 # Create your views here.
