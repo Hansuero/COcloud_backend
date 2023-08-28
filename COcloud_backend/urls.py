@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from project import views
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/user/', include(('user.urls', 'user'))),
@@ -23,5 +25,6 @@ urlpatterns = [
     path('api/message/', include(('message.urls', 'message'))),
     path('api/chat/', include(('chat.urls', 'chat'))),
     path('api/project/', include(('project.urls', 'project'))),
-    path('api/chat/', include('chat.urls'))
+    path('api/chat/', include('chat.urls')),
+
 ]
