@@ -3,6 +3,7 @@ from datetime import datetime
 from chat.models import GroupChatMessage
 from team.models import Team
 from user.models import User
+from project.models import Document
 
 
 # Create your models here.
@@ -21,22 +22,18 @@ class Report(models.Model):
             content = self.user.username + ' 在团队 ' + Team.objects.get(id=self.chat_id).name + ' 的群聊中@了你'
             return content
         else:
-            content = '内容暂时无法显示'
+            content = self.user.username + ' 在团队 ' + Document.objects.get(id=self.doc_id).team.name +' 的文档 ' + Document.objects.get(id=self.doc_id).title + ' 中@了你'
             return content
 
     def time_to_last(self, time):
         now_time = datetime.now().replace(tzinfo=None)
-        print(now_time)
-        print('----------DEBUG----------')
         time = time.replace(tzinfo=None)
-        print(time)
-        last = now_time - time
-        print(last)
+        last =now_time  - time
         last_second = int(last.seconds)
         last_minute = int(last_second / 60)
         last_hour = int(last_minute / 60)
         last_day = int(last.days)
-        if last_second < 15:
+        if last_second < 5:
             return '刚刚'
         elif last_second < 60:
             return str(last_second) + '秒前'
@@ -48,7 +45,7 @@ class Report(models.Model):
             return str(last_day) + '天前'
         else:
             return '3天前'
-
+        
     def to_dic(self):
         result = {
             'id': self.id,

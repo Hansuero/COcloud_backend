@@ -11,8 +11,7 @@ urlpatterns = [
     path('delete_file', delete_file),
     path('get_content', get_content),
     path('get_file', get_file),
-    path('chat_at', chat_at),
-    path('cur_edit', cur_edit),
     path('get_single_project', get_single_project),
+    path('doc_at', doc_at),
 
 ]

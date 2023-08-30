@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
 from .models import Project, DeletedProject, Team, User, Document
+from message.models import Report
 
 
 def create_project(request):
@@ -30,7 +31,7 @@ def rename_project(request):
 
 
 def delete_project(request):
-    project_id = request.POST.get('project_id')
+    project_id = request.GET.get('project_id')
     username = request.session.get('username')
     user = User.objects.get(username=username)
     project = get_object_or_404(Project, id=project_id)
@@ -52,12 +53,12 @@ def get_project(request):
             'project_id': project.id,
             'project_name': project.name,
             'project_creator': project.created_by.username,
-            'project_create_time': project.created_at.strftime('%Y-%m-%d'),
-            'project_member': project.team.teammember_set.count()
+            'project_create_time': project.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'project_mem': project.team.teammember_set.count()
         }
         project_list.append(project_info)
 
-    result = {'result': 0, 'message': '获取项目列表成功', 'project_list': project_list}
+    result = {'result': 0, 'message': '获取项目列表成功', 'projects': project_list}
     return JsonResponse(result)
 
 
@@ -116,8 +117,7 @@ def get_content(request):
 def get_file(request):
     team_id = request.GET.get('team_id')
     project_id = request.GET.get('project_id')
-
-    documents = Document.objects.filter(project_id=project_id, project__team_id=team_id, is_deleted=False)
+    documents = Document.objects.filter(project_id=project_id, is_deleted=False)
 
     files = []
     for document in documents:
@@ -125,31 +125,37 @@ def get_file(request):
             'file_id': document.id,
             'file_name': document.title,
             'file_editor': document.edited_by.username,
-            'file_edit_time': document.edited_at.strftime('%Y-%m-%d %H:%M:%S')
+            'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
         })
 
     result = {'result': 0, 'message': '获取文件列表成功', 'files': files}
     return JsonResponse(result)
 
 
-def chat_at(request):
+
+def doc_at(request):
+    receiver_name = request.POST.get('username')
+    sender_name = request.session['username']
     doc_id = request.POST.get('doc_id')
-    username = request.POST.get('username')
-
-    try:
-        document = Document.objects.get(id=doc_id)
-        user = User.objects.get(username=username)
-    except Document.DoesNotExist:
-        result = {'result': 1, 'message': '文档不存在'}
+    team_id = Document.objects.get(id=doc_id).team.id
+    if receiver_name == '所有人':
+        team_member_list = TeamMember.objects.filter(team_id=team_id)
+        for team_member in team_member_list:
+            receiver = User.objects.get(id=team_member.member.id)
+            if receiver.username == sender_name:
+                continue
+            sender = User.objects.get(username=sender_name)
+            message = Report.objects.create(user=sender, receiver=receiver, doc_id=doc_id)
+            message.save()
+        result = {'result': 0, 'message': '@成功'}
         return JsonResponse(result)
-    except User.DoesNotExist:
-        result = {'result': 1, 'message': '用户不存在'}
+    else:
+        receiver = User.objects.get(username=receiver_name)
+        sender = User.objects.get(username=sender_name)
+        message = Report.objects.create(user=sender, receiver=receiver, doc_id=doc_id)
+        message.save()
+        result = {'result': 0, 'message': '@成功'}
         return JsonResponse(result)
-
-    # 在这里执行 @ 功能的逻辑，可以根据实际情况进行实现
-
-    result = {'result': 0, 'message': '@ 成功'}
-    return JsonResponse(result)
 
 
 def cur_edit(request):

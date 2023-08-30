@@ -129,29 +129,30 @@ def invite(request):
         return JsonResponse(result)
     username = request.POST.get('username')
     password = request.POST.get('password')
+    try:
+        user = User.objects.get(username=username, password=password)
+        if TeamMember.objects.filter(team=team, member=user).exists():
+            result = {'result': 1, 'message': '用户已是团队成员'}
+            return JsonResponse(result)
+        else:
 
-    user = User.objects.get(username=username, password=password)
-    if user is None:
-        result = {'result': 1, 'message': '用户名或密码错误'}
-        return JsonResponse(result)
-    if TeamMember.objects.filter(team=team, member=user).exists():
-        result = {'result': 1, 'message': '用户已是团队成员'}
-        return JsonResponse(result)
-    else:
-
-        TeamMember.objects.create(team=team, member=user, role='member', nickname=user.username)
-        result = {'result': 0, 'message': '成功加入团队'}
-        return JsonResponse(result)
-
+            TeamMember.objects.create(team=team, member=user, role='member', nickname=user.username)
+            result = {'result': 0, 'message': '成功加入团队'}
+            return JsonResponse(result)
+    except User.DoesNotExist:
+            result = {'result': 1, 'message': '用户名或密码错误'}
+            return JsonResponse(result)
 
 def chat_at(request):
     receiver_name = request.POST.get('username')
     sender_name = request.session['username']
     team_id = request.POST.get('team_id')
     if receiver_name == '所有人':
-        team_member_list = TeamMember.objects.filter(id=team_id)
+        team_member_list = TeamMember.objects.filter(team_id=team_id)
         for team_member in team_member_list:
             receiver = User.objects.get(id=team_member.member.id)
+            if receiver.username == sender_name:
+                continue
             sender = User.objects.get(username=sender_name)
             message = Report.objects.create(user=sender, receiver=receiver, chat_id=team_id)
             message.save()

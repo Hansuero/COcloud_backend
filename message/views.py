@@ -56,7 +56,7 @@ def get_messagelist(request):
     message_filter_list = Report.objects.filter(receiver=user).order_by('-created_at')
     if message_filter_list.exists():
         for message in message_filter_list:
-            message_list.append(message.to_dic())
+            message_list.append(message.to_dic())    
         result = {
             'result': 0,
             'message': '获取消息列表成功',
