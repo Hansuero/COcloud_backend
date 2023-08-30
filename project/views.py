@@ -233,3 +233,15 @@ def create_folder(request):
 
     result = {'result': 0, 'message': '文件夹创建成功'}
     return JsonResponse(result)
+
+
+def delete_folder(request):
+    folder_id = request.POST.get('folder_id')
+    folder = get_object_or_404(Folder, id=folder_id)
+    # files = Document.objects.filter(folder=folder)
+    # for file in files:
+    #     file.is_deleted = True
+    #     file.save()
+    folder.delete()
+    result = {'result': 0, 'message': '文件夹删除成功'}
+    return JsonResponse(result)
