@@ -13,5 +13,6 @@ urlpatterns = [
     path('get_file', get_file),
     path('get_single_project', get_single_project),
     path('doc_at', doc_at),
+    path('create_folder', create_folder),
 
 ]

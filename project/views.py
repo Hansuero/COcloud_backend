@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
-from .models import Project, DeletedProject, Team, User, Document
+from .models import Project, DeletedProject, Team, User, Document, Folder
 from message.models import Report
 
 
@@ -15,6 +15,8 @@ def create_project(request):
     username = request.session.get('username')
     user = User.objects.get(username=username)
     team = get_object_or_404(Team, id=team_id)
+    if Project.objects.filter(team=team, name=project_name).exists():
+        result = {'result': 1, 'message': '该项目名称已被使用'}
     project = Project.objects.create(created_by=user, team=team, name=project_name)
     result = {'result': 0, 'message': '项目创建成功'}
     return JsonResponse(result)
@@ -37,7 +39,7 @@ def delete_project(request):
     project = get_object_or_404(Project, id=project_id)
     project.is_deleted = True
     project.save()
-    DeletedProject.objects.create(project=project,deleted_by=user)
+    DeletedProject.objects.create(project=project, deleted_by=user)
     result = {'result': 0, 'message': '项目删除成功'}
     return JsonResponse(result)
 
@@ -104,14 +106,14 @@ def delete_file(request):
 
 
 def get_content(request):
-        file_id = request.GET.get('file_id')
+    file_id = request.GET.get('file_id')
 
-        document = get_object_or_404(Document, id=file_id)
+    document = get_object_or_404(Document, id=file_id)
 
-        content = document.content
+    content = document.content
 
-        result = {'result': 0, 'message': '获取内容成功', 'content': content}
-        return JsonResponse(result)
+    result = {'result': 0, 'message': '获取内容成功', 'content': content}
+    return JsonResponse(result)
 
 
 def get_file(request):
@@ -130,7 +132,6 @@ def get_file(request):
 
     result = {'result': 0, 'message': '获取文件列表成功', 'files': files}
     return JsonResponse(result)
-
 
 
 def doc_at(request):
@@ -197,4 +198,38 @@ def get_single_project(request):
 
     result = {'result': 0, 'message': '获取项目信息成功', 'project': project_info}
     return JsonResponse(result)
-# Create your views here.
+
+
+def copy_project(request):
+    project_id = request.POST.get('project_id')
+    username = request.session.get('username')
+    user = User.objects.get(username=username)
+    project = Project.objects.get(id=project_id)
+    name_copy = project.name + '-副本'
+    if Project.objects.filter(name=name_copy).exists():
+        name_copy += '('
+        i = 1
+        while Project.objects.filter(name=name_copy + str(i) + ')').exists():
+            i = i + 1
+        name_copy += str(i) + ')'
+    project_copy = Project.objects.create(team=project.team, created_by=user, name=name_copy)
+    for doc in Document.objects.filter(project=project):
+        Document.objects.create(project=project_copy, team=doc.team, title=doc.title, content=doc.content)
+    result = {'result': 0, 'message': '复制成功'}
+    return JsonResponse(result)
+
+
+def create_folder(request):
+    project_id = request.POST.get('project_id')
+    folder_name = request.POST.get('folder_name')
+    username = request.session.get('username')
+    project = get_object_or_404(Project, id=project_id)
+
+    # 创建新文件夹
+    folder = Folder.objects.create(
+        project=project,
+        name=folder_name
+    )
+
+    result = {'result': 0, 'message': '文件夹创建成功'}
+    return JsonResponse(result)

@@ -23,12 +23,20 @@ class DeletedProject(models.Model):
         return f"Deleted:{self.project.name}"
 
 
+class Folder(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
+
 class Document(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True, blank=True, default=None)
     title = models.CharField(max_length=255)
     content = models.TextField()
     edited_by = models.ForeignKey(User, on_delete=models.CASCADE)  # 最后修改者
     edited_at = models.DateTimeField(auto_now=True)  # 最后修改时间
     is_deleted = models.BooleanField(default=False)  # 添加软删除字段
-# Create your models here.
+
+
+

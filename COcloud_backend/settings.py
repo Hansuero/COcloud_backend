@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    #'daphne',
+    # 'daphne',
     'channels',
     'chat',
     "django.contrib.admin",
@@ -79,16 +79,14 @@ ASGI_APPLICATION = 'COcloud_backend.asgi.application'
 WSGI_APPLICATION = "COcloud_backend.wsgi.application"
 
 CHANNEL_LAYERS = {
-'default': {
-		'BACKEND': 'channels_redis.core.RedisChannelLayer',
-		'CONFIG': {
-			# 连接自己的redis
-			"hosts": [('82.157.165.72', 6379)],
-		},
-	}
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            # 连接自己的redis
+            "hosts": [('82.157.165.72', 6379)],
+        },
+    }
 }
-
-
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
