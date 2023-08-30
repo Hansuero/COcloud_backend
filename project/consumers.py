@@ -5,11 +5,12 @@ from channels.exceptions import StopConsumer
 from .models import GroupChatMessage
 from user.models import User
 from team.models import Team
+
 CONN_LIST = [[] for i in range(100)]
 
 
 class ChatConsumer(WebsocketConsumer):
-    def websocket_connect(self, message): # message {'type': 'websocket.receive', 'text': {'username': '你爹', 'msg': i}}
+    def websocket_connect(self, message):  # message {'type': 'websocket.receive', 'text': {'username': '你爹', 'msg': i}}
         print("开始链接...")
         # 有客户端来向后端发送websocket连接的请求时，自动触发。
         # 服务端允许和客户端创建连接（握手）。
@@ -20,14 +21,14 @@ class ChatConsumer(WebsocketConsumer):
         for msg in message_list:
             res = {'type': 'websocket.receive', 'text': {'username': msg.sender.username, 'msg': msg.text_content}}
             self.send(json.dumps(res))
-        #for i in range(100):
+        # for i in range(100):
         #    res = {'type': 'websocket.receive', 'text': {'username': '你爹', 'msg': i}}
         #    self.send(json.dumps(res))
         CONN_LIST[self.room_id].append(self)
 
     def websocket_receive(self, message):
         text = eval((message['text']))
-        
+
         # 浏览器基于websocket向后端发送数据，自动触发接收消息。
         username = text['username']
         text_content = text['msg']
@@ -40,6 +41,6 @@ class ChatConsumer(WebsocketConsumer):
             conn.send(json.dumps(res))
 
     def websocket_disconnect(self, message):
-        #room_id = message['text']['room_id']
+        # room_id = message['text']['room_id']
         CONN_LIST[self.room_id].remove(self)
         raise StopConsumer()
