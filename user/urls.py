@@ -16,5 +16,5 @@ urlpatterns = [
     path('create_team', create_team),
     path('upload_nickname', upload_nickname),
     path('upload_avatar', upload_avatar),
-
+	path('get_id', get_id),
 ]

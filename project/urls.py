@@ -14,6 +14,9 @@ urlpatterns = [
     path('get_single_project', get_single_project),
     path('doc_at', doc_at),
     path('create_folder', create_folder),
+    path('get_doc_in_folder', get_doc_in_folder),
+    path('search_project', search_project),
+    path('copy_project', copy_project),
     path('delete_folder', delete_folder),
 
 ]

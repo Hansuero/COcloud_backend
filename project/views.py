@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
+from team.models import TeamMember
 from .models import Project, DeletedProject, Team, User, Document, Folder
 from message.models import Report
 
@@ -55,7 +56,7 @@ def get_project(request):
             'project_id': project.id,
             'project_name': project.name,
             'project_creator': project.created_by.username,
-            'project_create_time': project.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'project_create_time': project.created_at.strftime('%Y-%m-%d'),
             'project_mem': project.team.teammember_set.count()
         }
         project_list.append(project_info)
@@ -68,23 +69,34 @@ def create_file(request):
     file_name = request.POST.get('file_name')
     project_id = request.POST.get('project_id')
     team_id = request.POST.get('team_id')
+    folder_id = request.POST.get('folder_id')
     username = request.session.get('username')
 
     # 获取当前登录用户和团队
     user = User.objects.get(username=username)
     team = get_object_or_404(Team, id=team_id)
     project = get_object_or_404(Project, id=project_id)
-
-    # 创建新文档
-    document = Document.objects.create(
-        team=team,
-        project=project,
-        title=file_name,
-        content='',
-        edited_by=user,
-        edited_at=timezone.now(),
-        is_deleted=False
-    )
+    if int(folder_id) > 0:
+        document = Document.objects.create(
+            team=team,
+            project=project,
+            title=file_name,
+            content='',
+            folder=Folder.objects.get(id=folder_id),
+            edited_by=user,
+            edited_at=timezone.now(),
+            is_deleted=False
+        )
+    else:
+        document = Document.objects.create(
+            team=team,
+            project=project,
+            title=file_name,
+            content='',
+            edited_by=user,
+            edited_at=timezone.now(),
+            is_deleted=False
+        )
 
     result = {'result': 0, 'message': '文档创建成功'}
     return JsonResponse(result)
@@ -119,7 +131,7 @@ def get_content(request):
 def get_file(request):
     team_id = request.GET.get('team_id')
     project_id = request.GET.get('project_id')
-    documents = Document.objects.filter(project_id=project_id, is_deleted=False)
+    documents = Document.objects.filter(project_id=project_id, is_deleted=False, folder=None)
 
     files = []
     for document in documents:
@@ -129,8 +141,13 @@ def get_file(request):
             'file_editor': document.edited_by.username,
             'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
         })
-
-    result = {'result': 0, 'message': '获取文件列表成功', 'files': files}
+    folders = []
+    for folder in Folder.objects.filter(project_id=project_id):
+        folders.append({
+            'folder_id': folder.id,
+            'folder_name': folder.name
+        })
+    result = {'result': 0, 'message': '获取列表成功', 'files': files, 'folders': folders}
     return JsonResponse(result)
 
 
@@ -213,15 +230,23 @@ def copy_project(request):
             i = i + 1
         name_copy += str(i) + ')'
     project_copy = Project.objects.create(team=project.team, created_by=user, name=name_copy)
+    for folder in Folder.objects.filter(project=project):
+        Folder.objects.create(name=folder.name, project=project_copy)
+
     for doc in Document.objects.filter(project=project):
-        Document.objects.create(project=project_copy, team=doc.team, title=doc.title, content=doc.content)
+        doc_copy = Document.objects.create(project=project_copy, team=doc.team, title=doc.title, content=doc.content, edited_by=doc.edited_by)
+        if doc.folder is not None:
+            doc_copy.folder = Folder.objects.get(name=doc.folder.name, project=project_copy)
+            doc_copy.save()
     result = {'result': 0, 'message': '复制成功'}
     return JsonResponse(result)
-
 
 def create_folder(request):
     project_id = request.POST.get('project_id')
     folder_name = request.POST.get('folder_name')
+    if Folder.objects.filter(name=folder_name, project_id=project_id):
+        result = {'result': 1, 'message': '文件夹名已存在'}
+        return JsonResponse(result)
     username = request.session.get('username')
     project = get_object_or_404(Project, id=project_id)
 
@@ -232,6 +257,39 @@ def create_folder(request):
     )
 
     result = {'result': 0, 'message': '文件夹创建成功'}
+    return JsonResponse(result)
+
+
+def get_doc_in_folder(request):
+    folder_id = request.POST.get('folder_id')
+    files = []
+    for document in Document.objects.filter(folder_id=folder_id):
+        files.append({
+            'file_id': document.id,
+            'file_name': document.title,
+            'file_editor': document.edited_by.username,
+            'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
+        })
+
+    result = {'result': 0, 'message': '获取文件列表成功', 'files': files}
+    return JsonResponse(result)
+
+
+def search_project(request):
+    team_id = request.POST.get('team_id')
+    keyword = request.POST.get('keyword')
+    project_list = []
+    for project in Project.objects.filter(team_id=team_id, name__icontains=keyword):
+        project_info = {
+            'project_id': project.id,
+            'project_name': project.name,
+            'project_creator': project.created_by.username,
+            'project_create_time': project.created_at.strftime('%Y-%m-%d'),
+            'project_mem': project.team.teammember_set.count()
+        }
+        project_list.append(project_info)
+
+    result = {'result': 0, 'message': '获取项目列表成功', 'projects': project_list}
     return JsonResponse(result)
 
 
