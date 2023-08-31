@@ -241,3 +241,11 @@ def upload_nickname(request):
     except TeamMember.DoesNotExist:
         result = {'result': 1, 'report': '用户不存在'}
         return JsonResponse(result)
+
+
+def get_id(request):
+    username = request.POST.get('username')
+    id = User.objects.get(username=username).id
+    print(username, ' 的id是 ',id)
+    result = {'result': 0, 'id': id}
+    return JsonResponse(result)
