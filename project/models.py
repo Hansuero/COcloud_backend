@@ -34,9 +34,11 @@ class Document(models.Model):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True, blank=True, default=None)
     title = models.CharField(max_length=255)
     content = models.TextField()
-    edited_by = models.ForeignKey(User, on_delete=models.CASCADE)  # 最后修改者
+    edited_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None)  # 最后修改者
     edited_at = models.DateTimeField(auto_now=True)  # 最后修改时间
     is_deleted = models.BooleanField(default=False)  # 添加软删除字段
+    doc_code = models.CharField('文档邀请码', max_length=16)
+    guest_editable = models.BooleanField(default=False)
 
 
 

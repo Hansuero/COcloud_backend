@@ -29,15 +29,23 @@ class ChatConsumer(WebsocketConsumer):
         # 浏览器基于websocket向后端发送数据，自动触发接收消息。
         content = text['content']
         editer_name = text['username']
-        editer = User.objects.get(username=editer_name)
-        document = Document.objects.get(id=self.doc_id)
-        document.content = content
-        document.edited_by = editer
-        document.save()
-        res = {'type': 'websocket.receive', 'text': {'content': content}}
-        print(res)
-        for conn in CONN_LIST[self.doc_id]:
-            conn.send(json.dumps(res))
+        if editer_name == '':  # 游客
+            document = Document.objects.get(id=self.doc_id)
+            document.content = content
+            document.edited_by = None
+            document.save()
+            res = {'type': 'websocket.receive', 'text': {'content': content}}
+            for conn in CONN_LIST[self.doc_id]:
+                conn.send(json.dumps(res))
+        else:
+            editer = User.objects.get(username=editer_name)
+            document = Document.objects.get(id=self.doc_id)
+            document.content = content
+            document.edited_by = editer
+            document.save()
+            res = {'type': 'websocket.receive', 'text': {'content': content}}
+            for conn in CONN_LIST[self.doc_id]:
+                conn.send(json.dumps(res))
 
     def websocket_disconnect(self, message):
         #room_id = message['text']['room_id']

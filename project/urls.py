@@ -18,5 +18,9 @@ urlpatterns = [
     path('search_project', search_project),
     path('copy_project', copy_project),
     path('delete_folder', delete_folder),
+    path('get_invite_doc_link', get_invite_doc_link),
+    path('set_guest_editable', set_guest_editable),
+    path('get_guest_editable', get_guest_editable),
+    path('get_team_id_by_doc_id', get_team_id_by_doc_id),
 
 ]

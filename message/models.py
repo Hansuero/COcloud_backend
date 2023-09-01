@@ -22,7 +22,7 @@ class Report(models.Model):
             content = self.user.username + ' 在团队 ' + Team.objects.get(id=self.chat_id).name + ' 的群聊中@了你'
             return content
         else:
-            content = self.user.username + ' 在团队 ' + Document.objects.get(id=self.doc_id).team.name +' 的文档 ' + Document.objects.get(id=self.doc_id).title + ' 中@了你'
+            content = self.user.username + ' 在团队 ' + Document.objects.get(id=self.doc_id).team.name +' 的文档 《' + Document.objects.get(id=self.doc_id).title + '》 中@了你'
             return content
 
     def time_to_last(self, time):

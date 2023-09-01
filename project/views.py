@@ -1,5 +1,6 @@
 from datetime import datetime
-
+import random
+import string
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -65,6 +66,10 @@ def get_project(request):
     return JsonResponse(result)
 
 
+def generate_invite_code():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+
+
 def create_file(request):
     file_name = request.POST.get('file_name')
     project_id = request.POST.get('project_id')
@@ -76,7 +81,9 @@ def create_file(request):
     user = User.objects.get(username=username)
     team = get_object_or_404(Team, id=team_id)
     project = get_object_or_404(Project, id=project_id)
-    print(folder_id)
+    doc_code = generate_invite_code()
+    while Document.objects.filter(doc_code=doc_code).exists():
+        doc_code = generate_invite_code()
     if int(folder_id) > 0:
         document = Document.objects.create(
             team=team,
@@ -86,7 +93,8 @@ def create_file(request):
             folder=Folder.objects.get(id=folder_id),
             edited_by=user,
             edited_at=timezone.now(),
-            is_deleted=False
+            is_deleted=False,
+            doc_code=doc_code
         )
     else:
         document = Document.objects.create(
@@ -96,7 +104,8 @@ def create_file(request):
             content='',
             edited_by=user,
             edited_at=timezone.now(),
-            is_deleted=False
+            is_deleted=False,
+            doc_code=doc_code
         )
 
     result = {'result': 0, 'message': '文档创建成功'}
@@ -136,12 +145,20 @@ def get_file(request):
 
     files = []
     for document in documents:
-        files.append({
-            'file_id': document.id,
-            'file_name': document.title,
-            'file_editor': document.edited_by.username,
-            'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
-        })
+        if document.edited_by is None:
+            files.append({
+                'file_id': document.id,
+                'file_name': document.title,
+                'file_editor': '游客',
+                'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
+            })
+        else:
+            files.append({
+                'file_id': document.id,
+                'file_name': document.title,
+                'file_editor': document.edited_by.username,
+                'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
+            })
     folders = []
     for folder in Folder.objects.filter(project_id=project_id):
         folders.append({
@@ -234,7 +251,7 @@ def copy_project(request):
     for folder in Folder.objects.filter(project=project):
         Folder.objects.create(name=folder.name, project=project_copy)
 
-    for doc in Document.objects.filter(project=project):
+    for doc in Document.objects.filter(project=project, is_deleted=False):
         doc_copy = Document.objects.create(project=project_copy, team=doc.team, title=doc.title, content=doc.content, edited_by=doc.edited_by)
         if doc.folder is not None:
             doc_copy.folder = Folder.objects.get(name=doc.folder.name, project=project_copy)
@@ -264,14 +281,21 @@ def create_folder(request):
 def get_doc_in_folder(request):
     folder_id = request.POST.get('folder_id')
     files = []
-    for document in Document.objects.filter(folder_id=folder_id):
-        files.append({
-            'file_id': document.id,
-            'file_name': document.title,
-            'file_editor': document.edited_by.username,
-            'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
-        })
-
+    for document in Document.objects.filter(folder_id=folder_id, is_deleted=False):
+        if document.edited_by is None:
+            files.append({
+                'file_id': document.id,
+                'file_name': document.title,
+                'file_editor': '游客',
+                'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
+            })
+        else:
+            files.append({
+                'file_id': document.id,
+                'file_name': document.title,
+                'file_editor': document.edited_by.username,
+                'file_edit_time': document.edited_at.strftime('%Y-%m-%d')
+            })
     result = {'result': 0, 'message': '获取文件列表成功', 'files': files}
     return JsonResponse(result)
 
@@ -303,3 +327,37 @@ def delete_folder(request):
     folder.delete()
     result = {'result': 0, 'message': '文件夹删除成功'}
     return JsonResponse(result)
+
+
+def get_invite_doc_link(request):
+    doc_id = request.POST.get('doc_id')
+    try:
+        doc = Document.objects.get(id=doc_id)
+        doc_code = doc.doc_code
+        full_invite_code = f"http://82.157.165.72/invite_doc/{doc_code}"
+        result = {'result': 0, 'message': '成功获得邀请链接', 'invite_link': full_invite_code}
+        return JsonResponse(result)
+    except Document.DoesNotExist:
+        result = {'result': 1, 'message': '文件不存在'}
+        return JsonResponse(result)
+    
+    
+def set_guest_editable(request):
+    doc_id = request.POST.get('doc_id')
+    guest_editable = request.POST.get('guest_editable')
+    doc = Document.objects.get(id=doc_id)
+    doc.guest_editable = guest_editable
+    result = {'result': 0, 'message': '更改权限成功'}
+    return JsonResponse(result)
+
+
+def get_guest_editable(request):
+    doc_id = request.POST.get('doc_id')
+    guest_editable = Document.objects.get(id=doc_id).guest_editable
+    result = {'result': 0, 'message': '获取成功', 'guest_editable': guest_editable}
+    
+
+def get_team_id_by_doc_id(request):
+    doc_id = request.POST.get('doc_id')
+    team_id = Document.objects.get(id=doc_id).team.id
+    result = {'result': 0, 'message': '获取成功', 'team_id': team_id}
