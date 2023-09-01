@@ -61,61 +61,63 @@ def logout(request):
     return JsonResponse(result)
 
 
-username_verify = ''
-email_verify = ''
-code = 0
+username_verify = ['' for i in range(100)]
+email_verify = ['' for i in range(100)]
+code_list = [0 for i in range(100)]
 
 
 def verify_identity(request):
     username = request.POST.get('username')
+    
     email = request.POST.get('email')
     if User.objects.filter(username=username, email=email).exists():
+        user_id = User.objects.get(username=username).id
         result = {'result': 0, 'report': r'确认成功'}
         global username_verify
-        username_verify = username
+        username_verify[user_id] = username
         global email_verify
-        email_verify = email
+        email_verify[user_id] = email
         return JsonResponse(result)
     else:
         result = {'result': 1, 'report': r'用户名或邮箱错误'}
-        username_verify = ''
-        email_verify = ''
         return JsonResponse(result)
 
 
 def send_code(request):
+    username = request.POST.get('username')
+    user_id = User.objects.get(username=username).id
     try:
-        global code
-        code = send_email(email_verify)
-        result = {'result': 0, 'report': r'发送成功'}
+        global code_list
+        code_list[user_id] = send_email(email_verify[user_id])
+        result = {'result': 0, 'report': r'发送成功' }
         return JsonResponse(result)
     except:
-        code = 0
         result = {'result': 1, 'report': r'发送失败'}
         return JsonResponse(result)
 
 
 def verify_code(request):
-    global code
+    global code_list
+    username = request.POST.get('username')
+    user_id = User.objects.get(username=username).id
     code_to_verify = request.POST.get('code')
-    if code == code_to_verify:
-        code = 0
+    print('name:', username, 'code:', code_list[user_id], 'code_to_verify:', code_to_verify)
+    if code_list[user_id] == code_to_verify:
         result = {'result': 0, 'report': '验证码正确'}
         return JsonResponse(result)
     else:
-        code = 0
         result = {'result': 1, 'report': '验证码错误'}
         return JsonResponse(result)
 
 
 def change_password(request):
     global username_verify, email_verify
+    username = request.POST.get('username')
+    user_id = User.objects.get(username=username).id
     password = request.POST.get('password')
-    user = User.objects.get(username=username_verify)
+    user = User.objects.get(username=username_verify[user_id])
     user.password = password
     user.save()
-    username_verify = ''
-    email_verify = ''
     result = {'result': 0, 'report': '修改成功'}
     return JsonResponse(result)
 
@@ -233,7 +235,7 @@ def upload_nickname(request):
     user = User.objects.get(username=username)
     try:
         team = Team.objects.get(id=team_id)
-        teammember = TeamMember.objects.get(member=user, team=team, nickname=user.username)
+        teammember = TeamMember.objects.get(member=user, team=team)
         teammember.nickname = nickname
         teammember.save()
         result = {'result': 0, 'report': '修改成功'}

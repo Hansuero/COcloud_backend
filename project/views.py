@@ -76,6 +76,7 @@ def create_file(request):
     user = User.objects.get(username=username)
     team = get_object_or_404(Team, id=team_id)
     project = get_object_or_404(Project, id=project_id)
+    print(folder_id)
     if int(folder_id) > 0:
         document = Document.objects.create(
             team=team,
@@ -291,7 +292,6 @@ def search_project(request):
 
     result = {'result': 0, 'message': '获取项目列表成功', 'projects': project_list}
     return JsonResponse(result)
-
 
 def delete_folder(request):
     folder_id = request.POST.get('folder_id')
