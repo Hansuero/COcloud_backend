@@ -41,4 +41,10 @@ class Document(models.Model):
     guest_editable = models.BooleanField(default=False)
 
 
-
+class Page(models.Model):
+    name = models.CharField(max_length=255)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    canvasStyle = models.TextField()
+    canvasData = models.TextField()
+    edited_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None)  # 最后修改者
+    edited_at = models.DateTimeField(auto_now=True)  # 最后修改时间

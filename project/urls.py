@@ -22,5 +22,9 @@ urlpatterns = [
     path('set_guest_editable', set_guest_editable),
     path('get_guest_editable', get_guest_editable),
     path('get_team_id_by_doc_id', get_team_id_by_doc_id),
-
+    path('create_page', create_page),
+    path('get_page_list', get_page_list),
+    path('delete_page', delete_page),
+    path('save_page', save_page),
+    path('read_page', read_page)
 ]

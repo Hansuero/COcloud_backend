@@ -364,3 +364,23 @@ def get_team_id_by_doc_id(request):
     team_id = Document.objects.get(id=doc_id).team.id
     result = {'result': 0, 'message': '获取成功', 'team_id': team_id}
     return JsonResponse(result)
+
+
+def create_page(request):
+    pass
+
+
+def get_page_list(request):
+    pass
+
+
+def delete_page(request):
+    pass
+
+
+def save_page(request):
+    pass
+
+
+def read_page(request):
+    pass
