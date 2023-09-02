@@ -372,11 +372,9 @@ def get_team_id_by_doc_id(request):
 def create_page(request):
     name = request.POST.get('name')
     project_id = request.POST.get('project_id')
-    username = request.session.get('username')
-    user = User.objects.get(username=username)
     if Page.objects.filter(project_id=project_id, name=name).exists():
         result = {'result': 1, 'message': '该页面名称已被使用'}
-    page = Page.objects.create(edited_by=user, project_id=project_id, name=name)
+    page = Page.objects.create(project_id=project_id, name=name)
     result = {'result': 0, 'message': '页面创建成功'}
     return JsonResponse(result)
 
@@ -392,8 +390,6 @@ def get_page_list(request):
         page_info = {
             'page_id': page.id,
             'page_name': page.name,
-            'page_editor': page.edited_by.username,
-            'page_edit_time': page.edited_at.strftime('%Y-%m-%d'),
         }
         page_list.append(page_info)
 
@@ -413,9 +409,7 @@ def save_page(request):
     page_id = request.POST.get('page_id')
     canvasStyle = request.POST.get('canvasStyle')
     canvasData = request.POST.get('canvasData')
-    username = request.session.get('username')
-    user = User.objects.get(username=username)
-    Page.objects.filter(id=page_id).update(canvasStyle=canvasStyle, canvasData=canvasData, edited_by=user)
+    Page.objects.filter(id=page_id).update(canvasStyle=canvasStyle, canvasData=canvasData)
     result = {'result': 0, 'messsage': '保存成功'}
     return JsonResponse(result)
 
