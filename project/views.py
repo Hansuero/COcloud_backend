@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
 from team.models import TeamMember
-from .models import Project, DeletedProject, Team, User, Document, Folder
+from .models import Project, DeletedProject, Team, User, Document, Folder, Page
 from message.models import Report
 
 
@@ -252,12 +252,14 @@ def copy_project(request):
         Folder.objects.create(name=folder.name, project=project_copy)
 
     for doc in Document.objects.filter(project=project, is_deleted=False):
-        doc_copy = Document.objects.create(project=project_copy, team=doc.team, title=doc.title, content=doc.content, edited_by=doc.edited_by)
+        doc_copy = Document.objects.create(project=project_copy, team=doc.team, title=doc.title, content=doc.content,
+                                           edited_by=doc.edited_by)
         if doc.folder is not None:
             doc_copy.folder = Folder.objects.get(name=doc.folder.name, project=project_copy)
             doc_copy.save()
     result = {'result': 0, 'message': '复制成功'}
     return JsonResponse(result)
+
 
 def create_folder(request):
     project_id = request.POST.get('project_id')
@@ -317,6 +319,7 @@ def search_project(request):
     result = {'result': 0, 'message': '获取项目列表成功', 'projects': project_list}
     return JsonResponse(result)
 
+
 def delete_folder(request):
     folder_id = request.POST.get('folder_id')
     folder = get_object_or_404(Folder, id=folder_id)
@@ -340,8 +343,8 @@ def get_invite_doc_link(request):
     except Document.DoesNotExist:
         result = {'result': 1, 'message': '文件不存在'}
         return JsonResponse(result)
-    
-    
+
+
 def set_guest_editable(request):
     doc_id = request.POST.get('doc_id')
     guest_editable = request.POST.get('guest_editable')
@@ -357,7 +360,7 @@ def get_guest_editable(request):
     guest_editable = Document.objects.get(id=doc_id).guest_editable
     result = {'result': 0, 'message': '获取成功', 'guest_editable': guest_editable}
     return JsonResponse(result)
-    
+
 
 def get_team_id_by_doc_id(request):
     doc_id = request.POST.get('doc_id')
@@ -379,8 +382,17 @@ def delete_page(request):
 
 
 def save_page(request):
-    pass
+    page_id = request.POST.get('page_id')
+    canvasStyle = request.POST.get('canvasStyle')
+    canvasData = request.POST.get('canvasData')
+    Page.objects.filter(id=page_id).update(canvasStyle=canvasStyle, canvasData=canvasData)
+    result = {'result': 0, 'messsage': '保存成功'}
+    return JsonResponse(result)
 
 
 def read_page(request):
-    pass
+    page_id = request.POST.get('page_id')
+    canvasStyle = Page.objects.get(id=page_id).canvasStyle
+    canvasData = Page.objects.get(id=page_id).canvasData
+    result = {'result': 0, 'message': '读取成功', 'canvasStyle': canvasStyle, 'canvasData': canvasData}
+    return JsonResponse(result)
