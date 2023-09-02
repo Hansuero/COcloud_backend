@@ -385,7 +385,9 @@ def save_page(request):
     page_id = request.POST.get('page_id')
     canvasStyle = request.POST.get('canvasStyle')
     canvasData = request.POST.get('canvasData')
-    Page.objects.filter(id=page_id).update(canvasStyle=canvasStyle, canvasData=canvasData)
+    username = request.session.get('username')
+    user = User.objects.get(username=username)
+    Page.objects.filter(id=page_id).update(canvasStyle=canvasStyle, canvasData=canvasData, edit_by=user)
     result = {'result': 0, 'messsage': '保存成功'}
     return JsonResponse(result)
 
