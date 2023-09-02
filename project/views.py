@@ -370,15 +370,43 @@ def get_team_id_by_doc_id(request):
 
 
 def create_page(request):
-    pass
+    name = request.POST.get('name')
+    project_id = request.POST.get('project_id')
+    username = request.session.get('username')
+    user = User.objects.get(username=username)
+    if Page.objects.filter(project_id=project_id, name=name).exists():
+        result = {'result': 1, 'message': '该页面名称已被使用'}
+    page = Page.objects.create(edited_by=user, project_id=project_id, name=name)
+    result = {'result': 0, 'message': '页面创建成功'}
+    return JsonResponse(result)
+
 
 
 def get_page_list(request):
-    pass
+    project_id = request.POST.get('project_id')
+
+    pages = Page.objects.filter(project_id=project_id)
+
+    page_list = []
+    for page in pages:
+        page_info = {
+            'page_id': page.id,
+            'page_name': page.name,
+            'page_editor': page.edited_by.username,
+            'page_edit_time': page.edited_at.strftime('%Y-%m-%d'),
+        }
+        page_list.append(page_info)
+
+    result = {'result': 0, 'message': '获取页面列表成功', 'pages': page_list}
+    return JsonResponse(result)
 
 
 def delete_page(request):
-    pass
+    page_id = request.POST.get('page_id')
+    page = Page.objects.get(id=page_id)
+    page.delete()
+    result = {'result': 0, 'message': '页面删除成功'}
+    return JsonResponse(result)
 
 
 def save_page(request):
