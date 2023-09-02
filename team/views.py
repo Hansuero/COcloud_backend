@@ -170,7 +170,11 @@ def chat_at(request):
 def get_namelist(request):
     team_id = request.POST.get('team_id')
     username = request.session.get('username')
+    if username is None:
+        result = {'result': 3, 'message': '未登录'}
+        return JsonResponse(result)
     user = User.objects.get(username=username)
+    
 
     try:
         team = Team.objects.get(id=team_id)

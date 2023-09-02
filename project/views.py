@@ -347,6 +347,7 @@ def set_guest_editable(request):
     guest_editable = request.POST.get('guest_editable')
     doc = Document.objects.get(id=doc_id)
     doc.guest_editable = guest_editable
+    doc.save()
     result = {'result': 0, 'message': '更改权限成功'}
     return JsonResponse(result)
 
@@ -355,9 +356,11 @@ def get_guest_editable(request):
     doc_id = request.POST.get('doc_id')
     guest_editable = Document.objects.get(id=doc_id).guest_editable
     result = {'result': 0, 'message': '获取成功', 'guest_editable': guest_editable}
+    return JsonResponse(result)
     
 
 def get_team_id_by_doc_id(request):
     doc_id = request.POST.get('doc_id')
     team_id = Document.objects.get(id=doc_id).team.id
     result = {'result': 0, 'message': '获取成功', 'team_id': team_id}
+    return JsonResponse(result)
