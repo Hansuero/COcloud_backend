@@ -394,7 +394,8 @@ def save_page(request):
 
 def read_page(request):
     page_id = request.POST.get('page_id')
-    canvasStyle = Page.objects.get(id=page_id).canvasStyle
-    canvasData = Page.objects.get(id=page_id).canvasData
+    page = Page.objects.get(id=page_id)
+    canvasStyle = page.canvasStyle
+    canvasData = page.canvasData
     result = {'result': 0, 'message': '读取成功', 'canvasStyle': canvasStyle, 'canvasData': canvasData}
     return JsonResponse(result)
