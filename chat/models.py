@@ -8,7 +8,7 @@ from user.models import User
 class GroupChatMessage(models.Model):
     group = models.ForeignKey(Team, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    text_content = models.CharField(max_length=255)
+    text_content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
 

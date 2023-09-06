@@ -20,6 +20,12 @@ def create_project(request):
     if Project.objects.filter(team=team, name=project_name).exists():
         result = {'result': 1, 'message': '该项目名称已被使用'}
     project = Project.objects.create(created_by=user, team=team, name=project_name)
+    page_1 = Page.objects.get(id=1)
+    page_2 = Page.objects.get(id=2)
+    # page_3 = Page.objects.get(id=3)
+    Page.objects.create(name=page_1.name, project=project, canvasData=page_1.canvasData, canvasStyle=page_1.canvasStyle)
+    Page.objects.create(name=page_2.name, project=project, canvasData=page_2.canvasData, canvasStyle=page_2.canvasStyle)
+    # Page.objects.create(name=page_3.name, project=project, canvasData=page_3.canvasData, canvasStyle=page_3.canvasStyle) 
     result = {'result': 0, 'message': '项目创建成功'}
     return JsonResponse(result)
 
@@ -241,13 +247,16 @@ def copy_project(request):
     user = User.objects.get(username=username)
     project = Project.objects.get(id=project_id)
     name_copy = project.name + '-副本'
-    if Project.objects.filter(name=name_copy).exists():
+    if Project.objects.filter(name=name_copy, is_deleted=False).exists():
         name_copy += '('
         i = 1
         while Project.objects.filter(name=name_copy + str(i) + ')').exists():
             i = i + 1
         name_copy += str(i) + ')'
     project_copy = Project.objects.create(team=project.team, created_by=user, name=name_copy)
+    for page in Page.objects.filter(project=project):
+        Page.objects.create(name=page.name, project=project_copy, canvasData=page.canvasData, canvasStyle=page.canvasStyle)
+        
     for folder in Folder.objects.filter(project=project):
         Folder.objects.create(name=folder.name, project=project_copy)
 
@@ -306,7 +315,7 @@ def search_project(request):
     team_id = request.POST.get('team_id')
     keyword = request.POST.get('keyword')
     project_list = []
-    for project in Project.objects.filter(team_id=team_id, name__icontains=keyword):
+    for project in Project.objects.filter(team_id=team_id, name__icontains=keyword, is_deleted=False):
         project_info = {
             'project_id': project.id,
             'project_name': project.name,

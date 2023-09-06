@@ -93,7 +93,7 @@ CHANNEL_LAYERS = {
 
 # MySQL数据库配置
 mysql_ENGINE = 'django.db.backends.mysql'
-mysql_NAME = 'cocloud_1'
+mysql_NAME = 'cocloud_final'
 mysql_USER = 'comusic'
 mysql_PASSWORD = '2121Jizu'
 mysql_HOST = '82.157.165.72'

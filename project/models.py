@@ -43,7 +43,7 @@ class Document(models.Model):
 
 class Page(models.Model):
     name = models.CharField(max_length=255)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True)
     canvasStyle = models.TextField()
     canvasData = models.TextField()
 
